@@ -42,18 +42,19 @@ export default function VideoPlayer({ videoUrl, videoId, onError, onLoaded }) {
     localStorage.setItem('theme', newTheme);
   };
 
-  // Define toggleTheaterMode before it's used in handleKeyDown
   const toggleTheaterMode = useCallback(() => {
-    setIsTheaterMode(!isTheaterMode);
-  }, [isTheaterMode]);
+    setIsTheaterMode(prevState => !prevState);
+  }, []);
 
-  // Define togglePipMode before it's used in handleKeyDown
   const togglePipMode = useCallback(() => {
     if (!document.pictureInPictureElement) {
       const videoElement = document.querySelector('#youtube-player iframe');
       if (videoElement) {
-        videoElement.requestPictureInPicture();
-        setIsPipMode(true);
+        videoElement.requestPictureInPicture().then(() => {
+          setIsPipMode(true);
+        }).catch((err) => {
+          console.error('Failed to enter PiP mode:', err);
+        });
       }
     } else {
       document.exitPictureInPicture();
@@ -111,7 +112,7 @@ export default function VideoPlayer({ videoUrl, videoId, onError, onLoaded }) {
       console.error('Error initializing YouTube player:', error);
       onError?.("Failed to initialize video player");
     }
-  }, [videoId, onError, onLoaded, volume, playbackSpeed, isLooping]);
+  }, [videoId, onError, isLooping]);
 
   useEffect(() => {
     if (!youtubeApiLoaded.current && window.YT && window.YT.Player) {
@@ -301,6 +302,6 @@ export default function VideoPlayer({ videoUrl, videoId, onError, onLoaded }) {
 
 const formatTime = (seconds) => {
   const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  const secondsLeft = Math.floor(seconds % 60);
+  return `${minutes}:${secondsLeft < 10 ? '0' : ''}${secondsLeft}`;
 };

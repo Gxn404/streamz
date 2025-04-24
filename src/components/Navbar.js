@@ -19,7 +19,7 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 w-full z-50 backdrop-blur-md bg-gradient-to-r from-[#ff5722] via-[#ff0000] to-[#ffe100] p-4 transition-all duration-300 shadow-md dark:bg-black dark:shadow-white md:flex md:items-center dark:text-white">
       <div className="container mx-auto flex items-center justify-between">
-		/* Logo and Search */
+		{/* Logo and Search */}
 		<div className="flex items-center gap-4">
 			<div className="text-white font-bold text-xl">StreamZ</div>
 			<div className="relative flex items-center">

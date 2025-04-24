@@ -12,16 +12,12 @@ const SearchResults = () => {
     const [error, setError] = useState(null);
     const router = useRouter();
     const { query } = router.query;
-    
+
     useEffect(() => {
+        if (!query) return; // early exit if query is not defined
+
         const fetchSearchResults = async () => {
-            if (!query) {
-                setLoading(false);
-                return;
-            }
-            
             setLoading(true);
-            
             try {
                 const response = await axios.get(`https://streamz-roan.vercel.app/api/search?type=videos&query=${encodeURIComponent(query)}`);
                 setResults(response.data);
@@ -29,27 +25,28 @@ const SearchResults = () => {
                 setLoading(false);
             } catch (err) {
                 console.error('Search error:', err);
-                setError('Failed to load search results');
+                setError(`Failed to load search results: ${err.message}`);
                 setLoading(false);
             }
         };
-        
+
         fetchSearchResults();
     }, [query]);
-    
+
     const handleSearch = (searchQuery) => {
         router.push(`/results?query=${encodeURIComponent(searchQuery)}`);
     };
-    
+
     const renderContent = () => {
         if (loading) {
             return (
                 <div className="flex items-center justify-center h-[50vh]">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+                    <p className="text-gray-400 ml-4">Searching for "{query}"...</p>
                 </div>
             );
         }
-        
+
         if (error) {
             return (
                 <div className="flex flex-col items-center justify-center p-8 mt-10 bg-black/50 backdrop-blur-sm rounded-lg">
@@ -58,11 +55,11 @@ const SearchResults = () => {
                 </div>
             );
         }
-        
+
         if (!query) {
             return (
                 <div className="flex flex-col items-center justify-center p-8 mt-10 bg-black/50 backdrop-blur-sm rounded-lg">
-                    <h2 className="text-yellow-500 text-xl font-bold mb-4">No search query provided</h2>
+                    <h2 className="text-yellow-500 text-xl font-bold mb-4">Please enter a search term</h2>
                     <Input 
                         onSearch={handleSearch}
                         placeholder="What would you like to watch?"
@@ -71,7 +68,7 @@ const SearchResults = () => {
                 </div>
             );
         }
-        
+
         if (results.length === 0) {
             return (
                 <div className="flex flex-col items-center justify-center p-8 mt-10 bg-black/50 backdrop-blur-sm rounded-lg">
@@ -85,14 +82,14 @@ const SearchResults = () => {
                 </div>
             );
         }
-        
+
         return (
             <div className="mt-8">
                 <VideoCardMatrix videos={results} />
             </div>
         );
     };
-    
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
             <Navbar />
