@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 import ChannelThumbnail from "./ChannelThumbnail";
 
 export default function VideoCard({ video, onClick, onFavorite }) {
@@ -26,7 +27,10 @@ export default function VideoCard({ video, onClick, onFavorite }) {
     >
       {/* Thumbnail Area */}
       <div className="relative w-full aspect-video bg-gray-900">
-        <img
+        <Image
+          width={400}
+          height={225}
+          loading="lazy"
           src={thumbnailUrl ||video?.thumbnail?.[0]?.url}
           alt={video?.title}
           className="w-full h-full object-cover"

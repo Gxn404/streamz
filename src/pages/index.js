@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState , useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation"; // Updated to use next/navigation
 import { ChevronRight, ChevronLeft, Play } from "lucide-react";
@@ -17,6 +17,7 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [autoSlideEnabled, setAutoSlideEnabled] = useState(true);
   const router = useRouter();
+  
 
   // Normalize URLs to HTTPS
   const normalizeUrl = (url) => {
@@ -55,71 +56,75 @@ export default function Home() {
     setTimeout(() => setAutoSlideEnabled(true), 10000);
   };
 
-  const loadVideos = async (category = "now") => {
-    setLoading(true);
-    setError(null);
-    setCurrentSlide(0);
+  const loadVideos = useCallback(
+    async (category = "now") => {
+      setLoading(true);
+      setError(null);
+      setCurrentSlide(0);
 
-    try {
-      const trendingUrl = "https://streamz-roan.vercel.app/api/trending?type=now";
-      const searchUrl = `https://streamz-roan.vercel.app/api/search?type=videos&query=${encodeURIComponent(
-        category.toLowerCase()
-      )}`;
-      const moviesUrl = "https://streamz-roan.vercel.app/api/trending?type=movies";
+      try {
+        const trendingUrl = "https://streamz-roan.vercel.app/api/trending?type=now";
+        const searchUrl = `https://streamz-roan.vercel.app/api/search?type=videos&query=${encodeURIComponent(
+          category.toLowerCase()
+        )}`;
+        const moviesUrl = "https://streamz-roan.vercel.app/api/trending?type=movies";
 
-      const [trendingResponse, moviesResponse] = await Promise.all([
-        fetch(trendingUrl),
-        fetch(moviesUrl),
-      ]);
+        const [trendingResponse, moviesResponse] = await Promise.all([
+          fetch(trendingUrl),
+          fetch(moviesUrl),
+        ]);
 
-      const trendingData = await trendingResponse.json();
-      const moviesData = await moviesResponse.json();
-      console.log("Movies Data:", moviesData);
-      let videoData = Array.isArray(trendingData.response?.data)
-        ? trendingData.response.data
-        : [];
-      if (videoData.length === 0 && category !== "All") {
-        const searchResponse = await fetch(searchUrl);
-        const searchData = await searchResponse.json();
-        videoData = Array.isArray(searchData.response?.data)
-          ? searchData.response.data
+        const trendingData = await trendingResponse.json();
+        const moviesData = await moviesResponse.json();
+
+        let videoData = Array.isArray(trendingData.response?.data)
+          ? trendingData.response.data
           : [];
-      }
+        if (videoData.length === 0 && category !== "All") {
+          const searchResponse = await fetch(searchUrl);
+          const searchData = await searchResponse.json();
+          videoData = Array.isArray(searchData.response?.data)
+            ? searchData.response.data
+            : [];
+        }
 
-      setVideos(videoData);
-      const fetchedMovies = Array.isArray(moviesData.response?.data)
-        ? moviesData.response.data
-        : [];
-      setMovies(fetchedMovies);
-      setAutoSlideEnabled(true);
+        setVideos(videoData);
+        const fetchedMovies = Array.isArray(moviesData.response?.data)
+          ? moviesData.response.data
+          : [];
+        setMovies(fetchedMovies);
+        setAutoSlideEnabled(true);
 
-      // Log movie thumbnails
-      fetchedMovies.slice(0, 5).forEach((movie, index) => {
-        const thumbnailUrl = normalizeUrl(
-          movie.richThumbnail?.[0]?.url ||
+        // Log movie thumbnails
+        fetchedMovies.slice(0, 5).forEach((movie, index) => {
+          const thumbnailUrl = normalizeUrl(
+            movie.richThumbnail?.[0]?.url ||
             movie.thumbnail?.[2]?.url ||
             movie.thumbnail?.[1]?.url ||
             movie.thumbnail?.[0]?.url
-        );
-        console.log(`Movie ${index + 1} Thumbnail URL:`, thumbnailUrl);
-      });
-    } catch (err) {
-      setError("Failed to fetch content");
-      console.error("Error:", err);
-      setVideos([]);
-      setMovies([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+          );
+
+        });
+      } catch (err) {
+        setError("Failed to fetch content");
+        console.error("Error:", err);
+        setVideos([]);
+        setMovies([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   const handleVideoClick = (video) => {
     router.push(`/watch?v=${video.videoId}`);
   };
 
+// then useEffect to call it
   useEffect(() => {
     loadVideos(currentCategory);
-  }, [currentCategory]);
+  }, [currentCategory, loadVideos]);
 
   return (
     <div className="min-h-screen bg-black text-white p-4">

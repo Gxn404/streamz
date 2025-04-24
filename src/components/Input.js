@@ -30,7 +30,8 @@ export const Input = forwardRef(
     const [inputValue, setInputValue] = useState(value || "");
     const [error, setError] = useState("");
     const [isFocused, setIsFocused] = useState(false);
-    const inputRef = ref || useRef(null);
+    const innerRef = useRef(null);           // always called
+    const inputRef = ref ? ref : innerRef;   // choose which ref to use
     const debounceTimer = useRef(null);
 
     const hasGroup = showSearchBtn || showClearButton;

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import ChannelThumbnail from "@/components/ChannelThumbnail";
@@ -18,6 +18,20 @@ export default function WatchPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showCount, setShowCount] = useState(5);
+
+  const handlePlayerReady = useCallback(
+        (player) => {
+          // e.g. auto‑play if you want
+          try {
+            player.play();
+          } catch {
+            console.warn("Autoplay blocked, user interaction required");
+          }
+          // you could also hook up events:
+          // player.on('ended', () => console.log('video ended'));
+        },
+        [] // no external deps (or add state/props you reference)
+      );
 
   useEffect(() => {
     const fetchVideoData = async () => {
@@ -106,7 +120,10 @@ export default function WatchPage() {
               <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-red-500 to-yellow-400 rounded-xl animate-gradient-xy"></div>
               <div className="relative w-full h-full bg-gray-900 rounded-xl overflow-hidden z-10">
                 {video?.id ? (
-                  <VideoPlayer videoId={video.id} />
+                    <VideoPlayer
+                      videoId={video.id}
+                      onReady={handlePlayerReady}    // 3️⃣ pass it here
+                    />
                 ) : (
                   <div className="flex h-full items-center justify-center">
                     <p>Video not available</p>

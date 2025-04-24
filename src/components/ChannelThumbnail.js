@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 const ChannelThumbnail = ({ channelId }) => {
   const [thumbnailUrl, setThumbnailUrl] = useState(null);
@@ -52,14 +53,15 @@ const ChannelThumbnail = ({ channelId }) => {
           <span className="text-gray-300 text-xs">N/A</span>
         </div>
       ) : (
-        <img
-          src={thumbnailUrl}
-          alt="Channel Thumbnail"
-          width={40}
-          height={40}
-          loading="lazy"
-          className="rounded-full border-2 border-gray-800 shadow-md"
-        />
+        <Image
+      src={thumbnailUrl}
+      alt="Channel Thumbnail"
+      width={40}
+      height={40}
+      loading="lazy"
+      unoptimized={false}    // set to true to skip Next.js optimization
+      className="rounded-full border-2 border-gray-800 shadow-md"
+      />
       )}
     </div>
   );

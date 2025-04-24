@@ -76,7 +76,7 @@ const SearchResults = () => {
             return (
                 <div className="flex flex-col items-center justify-center p-8 mt-10 bg-black/50 backdrop-blur-sm rounded-lg">
                     <h2 className="text-yellow-500 text-xl font-bold mb-4">No results found for "{query}"</h2>
-                    <p className="text-gray-400 mb-6">Try different keywords or check spelling</p>
+                    <p className="text-gray-400 mb-6">{`Try different keywords or check spelling`}</p>
                     <Input 
                         onSearch={handleSearch}
                         placeholder="Try another search..."
