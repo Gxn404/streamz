@@ -11,7 +11,7 @@ const ChannelThumbnail = ({ channelId }) => {
 
     const fetchChannelThumbnail = async () => {
       setLoading(true);
-      setError(false); // Reset error state if the channelId changes
+      setError(false);
 
       try {
         const response = await fetch(
@@ -21,8 +21,7 @@ const ChannelThumbnail = ({ channelId }) => {
         if (!response.ok) throw new Error("Failed to fetch channel data");
 
         const data = await response.json();
-        console.log("Response:", data); // Log the response for debugging
-        // Check if thumbnail exists in response
+        console.log("Response:", data); 
         const thumbnail = 
           data?.response?.meta?.thumbnail?.[2]?.url ||
           data?.response?.meta?.thumbnail?.[1]?.url ||

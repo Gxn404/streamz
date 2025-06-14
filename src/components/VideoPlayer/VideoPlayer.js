@@ -24,6 +24,8 @@ export default function VideoPlayer({ videoUrl, videoId, onError, onLoaded }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hoverTime, setHoverTime] = useState(0);
   const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const [speedOptions, setSpeedOptions] = useState([0.5, 1, 1.5, 2]); // Playback speed options
+  const [volumeIcon, setVolumeIcon] = useState(<Volume2 size={24} />); // To dynamically switch volume icon
 
   const playerRef = useRef(null);
   const containerRef = useRef(null);
@@ -63,7 +65,7 @@ export default function VideoPlayer({ videoUrl, videoId, onError, onLoaded }) {
   }, []);
 
   const initYouTubePlayer = useCallback(() => {
-    if (playerRef.current) {
+    if (playerRef.current && typeof playerRef.current.destroy === 'function') {
       playerRef.current.destroy();
     }
 
@@ -146,6 +148,7 @@ export default function VideoPlayer({ videoUrl, videoId, onError, onLoaded }) {
     playerRef.current.setVolume(newVolume * 100);
     setVolume(newVolume);
     setIsMuted(newVolume === 0);
+    setVolumeIcon(newVolume === 0 ? <VolumeX size={24} /> : <Volume2 size={24} />);
   };
 
   const handleMuteToggle = useCallback(() => {
@@ -154,9 +157,11 @@ export default function VideoPlayer({ videoUrl, videoId, onError, onLoaded }) {
       playerRef.current.unMute();
       playerRef.current.setVolume(volume * 100);
       setIsMuted(false);
+      setVolumeIcon(<Volume2 size={24} />);
     } else {
       playerRef.current.mute();
       setIsMuted(true);
+      setVolumeIcon(<VolumeX size={24} />);
     }
   }, [isMuted, volume, playerReady]);
 
@@ -265,43 +270,60 @@ export default function VideoPlayer({ videoUrl, videoId, onError, onLoaded }) {
             value={progress}
             onChange={handleProgressChange}
             onMouseMove={handleMouseMove}
-            className="flex-1"
+            className="flex-1 cursor-pointer"
           />
           <span className="text-white text-sm">{formatTime(duration)}</span>
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-between">
-          <button onClick={handlePlayPause} className="cursor-pointer">{isPlaying ? <Pause /> : <Play />}</button>
-          <button onClick={handleMuteToggle} className="cursor-pointer">{isMuted ? <VolumeX /> : <Volume2 />}</button>
+        <div className="flex justify-between items-center">
+          <div className="flex gap-4 items-center">
+            <button className="text-white" onClick={handlePlayPause}>
+              {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+            </button>
+            <button className="text-white" onClick={handleMuteToggle}>
+              {volumeIcon}
+            </button>
+            <input
+              type="range"
+              value={volume}
+              onChange={handleVolumeChange}
+              className="w-24"
+            />
+            <button className="text-white" onClick={toggleFullscreen}>
+              {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
+            </button>
+          </div>
+          <div className="flex gap-4 items-center">
+            <button className="text-white" onClick={toggleTheaterMode}>
+              <Film size={24} />
+            </button>
+            <button className="text-white" onClick={togglePipMode}>
+              <PictureInPicture size={24} />
+            </button>
+            <button className="text-white" onClick={toggleTheme}>
+              {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
+            </button>
+            {/* Settings */}
           <VideoSettings
-            playerRef={playerRef}
-            theme={theme}
-            setTheme={setTheme}
-            toggleTheme={toggleTheme}
+            quality={quality}
+            availableQualities={availableQualities}
+            setQuality={setQuality}
+            setPlaybackSpeed={setPlaybackSpeed}
+            playbackSpeed={playbackSpeed}
             isLooping={isLooping}
             setIsLooping={setIsLooping}
-            availableQualities={availableQualities}
-            quality={quality}
-            setQuality={setQuality}
+            speedOptions={speedOptions} // Added playback speed options
           />
-          <button onClick={toggleFullscreen} className="cursor-pointer">{isFullscreen ? <Minimize /> : <Maximize />}</button>
-          <button onClick={toggleTheaterMode} className="cursor-pointer">{isTheaterMode ? <ChevronLeft /> : <Film />}</button>
-          <button onClick={togglePipMode} className="cursor-pointer">{isPipMode ? <ChevronRight /> : <PictureInPicture />}</button>
+          </div>
         </div>
       </div>
-
-      {!isPlaying && (
-        <div className="floating-play-button cursor-pointer" onClick={handlePlayPause}>
-          <Play />
-        </div>
-      )}
     </div>
   );
 }
 
-const formatTime = (seconds) => {
+function formatTime(seconds) {
   const minutes = Math.floor(seconds / 60);
-  const secondsLeft = Math.floor(seconds % 60);
-  return `${minutes}:${secondsLeft < 10 ? '0' : ''}${secondsLeft}`;
-};
+  const secs = Math.floor(seconds % 60);
+  return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+}

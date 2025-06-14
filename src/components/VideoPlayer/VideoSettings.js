@@ -1,129 +1,208 @@
 import { useState } from 'react';
-import { Settings, Sun, Moon } from 'lucide-react';
+import { Settings, Sun, Moon, RotateCcw, RotateCw, Bookmark, Download, Scissors, ListChecks, Subtitles } from 'lucide-react';
 
-export default function VideoSettings({ playerRef, theme, setTheme, toggleTheme, isLooping, setIsLooping, availableQualities, quality, setQuality }) {
+export default function VideoSettings({
+  playerRef,
+  theme,
+  toggleTheme,
+  isLooping,
+  setIsLooping,
+  availableQualities,
+  quality,
+  setQuality,
+  playbackSpeed,
+  setPlaybackSpeed,
+}) {
+  // Local UI state
   const [showSettings, setShowSettings] = useState(false);
   const [showCaptions, setShowCaptions] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [captionSize, setCaptionSize] = useState(16);
 
   const handleQualityChange = (e) => {
-    setQuality(e.target.value);
-    playerRef.current?.setPlaybackQuality(e.target.value);
+    const q = e.target.value;
+    setQuality(q);
+    if (playerRef.current) {
+      playerRef.current?.setPlaybackQuality(q);
+    }
   };
 
   const handleCaptionsToggle = () => {
-    setShowCaptions(!showCaptions);
-    if (showCaptions) {
-      playerRef.current?.unloadModule('captions');
-    } else {
-      playerRef.current?.loadModule('captions');
+    setShowCaptions((prev) => !prev);
+    if (playerRef.current) {
+      if (showCaptions) {
+        playerRef.current?.unloadModule('captions');
+      } else {
+        playerRef.current?.loadModule('captions');
+      }
+    }
+  };
+
+  const handleCaptionSizeChange = (e) => {
+    const size = parseInt(e.target.value, 10);
+    setCaptionSize(size);
+    if (playerRef.current) {
+      playerRef.current?.setOption('captions', 'fontSize', size);
     }
   };
 
   const handleLoopToggle = () => {
-    setIsLooping(!isLooping);
-    playerRef.current?.setLoop(isLooping);
+    setIsLooping((prev) => !prev);
+    if (playerRef.current) {
+      playerRef.current?.setLoop(!isLooping);
+    }
   };
 
   const handlePlaybackSpeedChange = (e) => {
-    const newSpeed = parseFloat(e.target.value);
-    setPlaybackSpeed(newSpeed);
-    playerRef.current?.setPlaybackRate(newSpeed);
+    const speed = parseFloat(e.target.value);
+    setPlaybackSpeed(speed);
+    if (playerRef.current) {
+      playerRef.current?.setPlaybackRate(speed);
+    }
+  };
+
+  const downloadVideo = () => {
+    if (playerRef.current) {
+      const url = playerRef.current?.getVideoUrl() || '';
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${playerRef.current?.getVideoData()?.title || 'video'}`;
+      a.click();
+    }
+  };
+
+  const takeScreenshot = () => {
+    alert('Screenshot feature coming soon');
+  };
+
+  const bookmarkTime = () => {
+    if (playerRef.current) {
+      const t = playerRef.current?.getCurrentTime();
+      localStorage.setItem('bookmark', t);
+      alert(`Bookmarked at ${Math.floor(t)}s`);
+    }
   };
 
   return (
-    <div className="relative">
+    <div className="relative flex items-center space-x-2">
       <button
-        onClick={() => setShowSettings(!showSettings)}
-        className="text-white hover:text-orange-500 transition-colors"
+        onClick={() => setShowSettings((prev) => !prev)}
+        className="text-white hover:text-orange-500"
       >
         <Settings className="w-6 h-6" />
       </button>
+
       {showSettings && (
-        <div className="absolute bottom-full right-0 mb-2 w-48 bg-black/90 rounded-lg p-2 backdrop-blur-sm">
-          <div className="mb-2">
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-sm text-gray-300">Loop</label>
-              <div className="relative inline-block w-10 mr-2 align-middle select-none">
-                <input
-                  type="checkbox"
-                  checked={isLooping}
-                  onChange={handleLoopToggle}
-                  className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out"
-                  style={{
-                    transform: isLooping ? 'translateX(100%)' : 'translateX(0)',
-                    borderColor: isLooping ? '#f97316' : '#4b5563'
-                  }}
-                />
-                <label className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-700 cursor-pointer"></label>
-              </div>
-            </div>
+        <div className="absolute bottom-full right-0 mb-2 w-56 bg-black/90 rounded-lg p-3 backdrop-blur-sm space-y-3 border border-neutral-700">
+          {/* Loop */}
+          <div className="flex justify-between items-center">
+            <label className="text-sm text-gray-300">Loop</label>
+            <button
+              onClick={handleLoopToggle}
+              className={`p-1 rounded ${isLooping ? 'bg-orange-500' : 'bg-gray-700'}`}
+            >
+              {isLooping ? (
+                <RotateCw className="w-5 h-5 text-white" />
+              ) : (
+                <RotateCcw className="w-5 h-5 text-white" />
+              )}
+            </button>
           </div>
-          <div className="mb-2">
-            <label className="text-sm text-gray-300 block mb-1">Quality</label>
+
+          {/* Quality */}
+          <div>
+            <label className="text-sm text-gray-300">Quality</label>
             <select
               value={quality}
               onChange={handleQualityChange}
-              className="w-full bg-gray-800 text-white text-sm rounded p-1"
+              className="w-full bg-gray-800 text-white text-sm rounded p-1 mt-1"
             >
-              {availableQualities.map((q) => {
-                let label = '';
-                switch(q) {
-                  case 'highres': label = '4320p (8K)'; break;
-                  case 'hd2880': label = '2880p (5K)'; break;
-                  case 'hd2160': label = '2160p (4K)'; break;
-                  case 'hd1440': label = '1440p'; break;
-                  case 'hd1080': label = '1080p'; break;
-                  case 'hd720': label = '720p'; break;
-                  case 'large': label = '480p'; break;
-                  case 'medium': label = '360p'; break;
-                  case 'small': label = '240p'; break;
-                  case 'tiny': label = '144p'; break;
-                  case 'auto': label = 'Auto'; break;
-                  default: label = q.toUpperCase();
-                }
-                return <option key={q} value={q}>{label}</option>;
-              })}
-            </select>
-          </div>
-          <div className="mb-2">
-            <label className="text-sm text-gray-300 block mb-1">Playback Speed</label>
-            <select
-              value={playbackSpeed}
-              onChange={handlePlaybackSpeedChange}
-              className="w-full bg-gray-800 text-white text-sm rounded p-1"
-            >
-              {[0.25, 0.5, 1, 1.5, 2].map((speed) => (
-                <option key={speed} value={speed}>{speed}x</option>
+              {availableQualities.map((q) => (
+                <option key={q} value={q}>
+                  {q}
+                </option>
               ))}
             </select>
           </div>
-          <div className="mb-2">
-            <div className="flex items-center justify-between mb-1">
+
+          {/* Playback Speed */}
+          <div>
+            <label className="text-sm text-gray-300">Speed</label>
+            <select
+              value={playbackSpeed}
+              onChange={handlePlaybackSpeedChange}
+              className="w-full bg-gray-800 text-white text-sm rounded p-1 mt-1"
+            >
+              {[0.25, 0.5, 1, 1.25, 1.5, 2].map((s) => (
+                <option key={s} value={s}>
+                  {s}x
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Captions */}
+          <div>
+            <div className="flex justify-between items-center mb-1">
               <label className="text-sm text-gray-300">Captions</label>
-              <div className="relative inline-block w-10 mr-2 align-middle select-none">
-                <input
-                  type="checkbox"
-                  checked={showCaptions}
-                  onChange={handleCaptionsToggle}
-                  className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out"
-                  style={{
-                    transform: showCaptions ? 'translateX(100%)' : 'translateX(0)',
-                    borderColor: showCaptions ? '#f97316' : '#4b5563'
-                  }}
-                />
-                <label className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-700 cursor-pointer"></label>
-              </div>
+              <button
+                onClick={handleCaptionsToggle}
+                className="p-1 rounded bg-gray-700"
+              >
+                <Subtitles className="w-5 h-5 text-white" />
+              </button>
             </div>
+            {showCaptions && (
+              <div>
+                <label className="text-sm text-gray-300">Caption Size</label>
+                <input
+                  type="range"
+                  min="12"
+                  max="36"
+                  value={captionSize}
+                  onChange={handleCaptionSizeChange}
+                  className="w-full mt-1"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-between">
+            <button onClick={downloadVideo} className="text-white hover:text-orange-500">
+              <Download className="w-5 h-5" />
+            </button>
+            <button onClick={takeScreenshot} className="text-white hover:text-orange-500">
+              <Scissors className="w-5 h-5" />
+            </button>
+            <button onClick={bookmarkTime} className="text-white hover:text-orange-500">
+              <Bookmark className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Playlist */}
+          <div>
+            <label className="text-sm text-gray-300">Playlist</label>
+            <button className="w-full text-left text-white text-sm p-1 bg-gray-800 rounded mt-1 flex items-center space-x-2">
+              <ListChecks className="w-5 h-5" />
+              <span>View Playlist</span>
+            </button>
+          </div>
+
+          {/* Theme Toggle */}
+          <div className="flex justify-end">
+            <button
+              onClick={toggleTheme}
+              className="text-white hover:text-orange-500"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
+            </button>
           </div>
         </div>
       )}
-      <button
-        onClick={toggleTheme}
-        className="text-white hover:text-orange-500 transition-colors"
-      >
-        {theme === 'dark' ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
-      </button>
     </div>
   );
 }
