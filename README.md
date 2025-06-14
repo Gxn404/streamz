@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🎬 StreamZ - Next.js Movie Streaming Platform
 
-## Getting Started
+StreamZ is a sleek, modern streaming web app built with [Next.js](https://nextjs.org), powered by custom movie data, immersive UI/UX, and a lightning-fast developer experience. Designed with creativity, performance, and responsiveness in mind.
 
-First, run the development server:
+> ⚡ Built by [@Gxn404](https://github.com/Gxn404)
+
+---
+
+## 🚀 Getting Started
+
+First, install dependencies and run the development server:
 
 ```bash
+npm install
 npm run dev
-# or
+```
+Or with your preferred package manager:
+```
 yarn dev
 # or
 pnpm dev
 # or
 bun dev
 ```
+Then open http://localhost:3000 in your browser.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+##🧠 Tech Stack
+Framework: Next.js 15+
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Styling: Tailwind CSS + Custom Dark Theme
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Icons: Bootstrap Icons
 
-## Learn More
+Deployment: Vercel
 
-To learn more about Next.js, take a look at the following resources:
+Media Hosting: TMDb / YouTube thumbnails (optional support)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+State: Lightweight client-side state with hooks
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+API / DB: Custom API (MongoDB or mock data)
 
-## Deploy on Vercel
+##🛠️ Project Structure (App Router)
+```
+streamz/
+├── app/
+│   ├── page.js           # Landing page
+│   ├── watch/            # Video player pages
+├── components/           # UI components
+├── public/               # Static assets
+├── styles/               # Global styles
+├── next.config.mjs       # Next.js config
+└── tailwind.config.js    # Tailwind config
+```
+##📸 Features
+✅ Immersive movie cards
+✅ Responsive & accessible
+✅ Dark mode UI with neon accents
+✅ Integrated video player (local or iframe)
+✅ Search + Watch + Discover workflows
+✅ Optimized font loading with next/font
+✅ Ready for future AI-powered movie recs (FlickMate vibes 😉)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+📦 Deployment
+Easiest way? Use Vercel — the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+``vercel
+``
+Or push to GitHub, connect to Vercel, and it’s live instantly ✨
+
+##📚 Learn More About Next.js
+-📘 Next.js Docs
+-🎯 Learn Next.js
+-💻 Next.js GitHub
+
+##⚡ License
+MIT — do what you want, just don’t sell it as-is without credits 😉
+```
+
+---
+
+Want me to add badges (like GitHub stars, deploy preview, license, etc.) or generate a cool logo/banner using AI tools? Just ask and I’ll cook 🔥
+```
